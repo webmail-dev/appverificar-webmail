@@ -1,0 +1,773 @@
+<main class="app-wrapper">
+
+  <div class="container-fluid">
+
+    <div class="app-page-head d-flex align-items-center justify-content-between" *ngIF="viewMode==='recent'">
+      <nav aria-label="breadcrumb" [hidden]="viewMode!=='recent'">
+        <ol class="breadcrumb mb-0 ">
+          <li class="breadcrumb-item">
+            <a href="index.html" class="text-lg">
+              <i class="fi fi-rs-home"></i> VerificarIT
+            </a>
+          </li>
+        </ol>
+      </nav>
+    </div>
+
+    <div class="row">
+
+      <div class="col-xxl-6 col-lg-6 col-5">
+        <div class="row" [hidden]="viewMode !=='recent'" >
+          <div class=" ">
+            <div class="card" style="min-height: 200px;">
+              <div class="card-header d-flex align-items-center justify-content-between border-0 pb-0">
+                <div class="clearfix">
+                  <h6> TOTAL:</h6>
+                </div>
+                <div class="d-none d-lg-flex align-items-center gap-2 position-relative">
+                  <input type="checkbox" id="desktop-fab-check" class="fab-check">
+                  <label class="btn btn-primary waves-effect waves-light" for="desktop-fab-check">
+                    <i class="fi fi-rr-plus me-1"></i> Nueva inspeccion
+                  </label>
+                  <div class="fab-options d-flex flex-column"
+                    style="bottom: auto; top: 100%; right: 0; left: auto; transform-origin: top right; z-index: 1050;">
+                    <a routerLink="/nueva" class="fab-option">
+                      <span class="fab-label ">Busetas</span>
+                      <span class="fab-option-icon">1</span>
+                    </a>
+                    <a routerLink="/nueva" class="fab-option">
+                      <span class="fab-label">Camioneta</span>
+                      <span class="fab-option-icon">2</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-body py-0 d-flex align-items-start justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                  <h2 class="mb-0 text-blue">{{ totalInspections | number:'1.0-0' }}</h2>
+                </div>
+                <div id="chartContacts" class="mb-n4 mt-n3"></div>
+              </div>
+
+              <div class="card-footer border-0 pt-0 mt-n1">
+                <div class="border-top pb-2"></div>
+                <div class="d-flex align-items-center justify-content-between">
+                  <p class="mb-0">Este mes:
+                    <span class="text-blue" style="font-size: 20px;">
+                      {{ currentMonthInspections | number:'1.0-0' }}
+                    </span>
+                  </p>
+                  <a class="btn-link">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path opacity="0.5"
+                        d="M3.33301 9.375C2.98783 9.375 2.70801 9.65483 2.70801 10C2.70801 10.3452 2.98783 10.625 3.33301 10.625V9.375ZM3.33301 10.625H16.6663V9.375H3.33301V10.625Z"
+                        fill="var(--bs-primary)" />
+                      <path d="M11.667 5L16.667 10L11.667 15" stroke="var(--bs-primary)" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xxl-6 col-lg-6 col-7" [hidden]="viewMode !=='recent'">
+        <div class="row">
+          <div class="col-12">
+            <div class="card overflow-hidden bg-primary border-0 ovarlay-primary-gradient"
+              style="background-image: url(assets/images/auth/auth-frame.webp); background-position: center; background-size: cover; min-height: 200px;">
+              <div
+                class="card-header pb-3 border-0 d-flex align-items-center justify-content-between z-1 position-relative">
+                <h6 class="card-title mb-0 text-white d-none d-lg-block">Distribución</h6>
+                <div class="d-flex d-lg-none gap-4 align-items-center h-100">
+                  <div class="d-flex flex-column align-items-center">
+                    <span class="text-white fw-bold fs-3">1</span>
+                    <span class="badge bg-blue text-white rounded-pill px-3 py-1">Apr.</span>
+                  </div>
+                  <div class="d-flex flex-column align-items-center">
+                    <span class="text-white fw-bold fs-3">0</span>
+                    <span class="badge bg-blue text-white rounded-pill px-3 py-1">Rech.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body pt-0 border-light border-bottom border-opacity-10 d-none d-lg-block">
+                <div class="mb-5 mt-n3 z-n1 position-relative">
+                  <div id="statusChart"></div>
+                </div>
+                <div class="px-4 mb-3 d-flex align-items-start justify-content-between">
+                  <div class="d-flex flex-column align-items-center">
+                    <h3 class="mb-0 text-white">1</h3>
+                    <p class="text-white text-opacity-50 mb-0">Aprobadas</p>
+                  </div>
+                  <div class="d-flex flex-column align-items-center">
+                    <h3 class="mb-0 text-white">0</h3>
+                    <p class="text-white text-opacity-50 mb-0">Rechazadas</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="col-xxl-12">
+        <div class="card overflow-hidden">
+
+
+          <div *ngIf="expiredCount > 0 || expiringSoonCount > 0 ||
+            soatExpiredCount > 0 || soatExpiringCount > 0 ||
+            tecnomecanicaExpiredCount > 0 || tecnomecanicaExpiringCount > 0 ||
+            tarjetaOperacionExpiredCount > 0 || tarjetaOperacionExpiringCount > 0 ||
+            licenciaExpiredCount > 0 || licenciaExpiringCount > 0"
+            class="alert alert-info alert-dismissible fade show mb-0 rounded-0" role="alert"
+            style="cursor: pointer;" (click)="showExpiryIssues()" [hidden]="viewMode !=='recent'">
+            <div class="d-flex align-items-start">
+              <i class="fi fi-rr-info fs-4 me-3 mt-1"></i>
+              <div class="flex-grow-1">
+                <strong class="d-block mb-1">
+                  Información de vencimientos
+                  <span class="badge bg-info ms-2 small">Haz clic para ver las inspecciones afectadas</span>
+                </strong>
+
+                <div class="row g-2">
+
+                  <div class="col-md-6 col-lg-4" *ngIf="expiredCount > 0 || expiringSoonCount > 0">
+                    <div class="fw-semibold text-primary mb-1">Inspecciones</div>
+                    <div *ngIf="expiredCount > 0" class="text-danger small">
+                      <i class="fi fi-rr-warning me-1"></i> <strong>{{ expiredCount }}</strong> vencida(s)
+                    </div>
+                    <div *ngIf="expiringSoonCount > 0" class="text-warning small">
+                      <i class="fi fi-rr-clock me-1"></i> <strong>{{ expiringSoonCount }}</strong> próxima(s) a vencer (30 días)
+                    </div>
+                  </div>
+
+
+                  <div class="col-md-6 col-lg-4" *ngIf="soatExpiredCount > 0 || soatExpiringCount > 0">
+                    <div class="fw-semibold text-primary mb-1">SOAT</div>
+                    <div *ngIf="soatExpiredCount > 0" class="text-danger small">
+                      <i class="fi fi-rr-warning me-1"></i> <strong>{{ soatExpiredCount }}</strong> vencido(s)
+                    </div>
+                    <div *ngIf="soatExpiringCount > 0" class="text-warning small">
+                      <i class="fi fi-rr-clock me-1"></i> <strong>{{ soatExpiringCount }}</strong> próximo(s) a vencer
+                    </div>
+                  </div>
+
+
+                  <div class="col-md-6 col-lg-4" *ngIf="tecnomecanicaExpiredCount > 0 || tecnomecanicaExpiringCount > 0">
+                    <div class="fw-semibold text-primary mb-1">Rev. Tecnomecánica</div>
+                    <div *ngIf="tecnomecanicaExpiredCount > 0" class="text-danger small">
+                      <i class="fi fi-rr-warning me-1"></i> <strong>{{ tecnomecanicaExpiredCount }}</strong> vencida(s)
+                    </div>
+                    <div *ngIf="tecnomecanicaExpiringCount > 0" class="text-warning small">
+                      <i class="fi fi-rr-clock me-1"></i> <strong>{{ tecnomecanicaExpiringCount }}</strong> próxima(s) a vencer
+                    </div>
+                  </div>
+
+
+                  <div class="col-md-6 col-lg-4" *ngIf="tarjetaOperacionExpiredCount > 0 || tarjetaOperacionExpiringCount > 0">
+                    <div class="fw-semibold text-primary mb-1">Tarjeta de Operación</div>
+                    <div *ngIf="tarjetaOperacionExpiredCount > 0" class="text-danger small">
+                      <i class="fi fi-rr-warning me-1"></i> <strong>{{ tarjetaOperacionExpiredCount }}</strong> vencida(s)
+                    </div>
+                    <div *ngIf="tarjetaOperacionExpiringCount > 0" class="text-warning small">
+                      <i class="fi fi-rr-clock me-1"></i> <strong>{{ tarjetaOperacionExpiringCount }}</strong> próxima(s) a vencer
+                    </div>
+                  </div>
+
+
+                  <div class="col-md-6 col-lg-4" *ngIf="licenciaExpiredCount > 0 || licenciaExpiringCount > 0">
+                    <div class="fw-semibold text-primary mb-1">Licencia de Conducción</div>
+                    <div *ngIf="licenciaExpiredCount > 0" class="text-danger small">
+                      <i class="fi fi-rr-warning me-1"></i> <strong>{{ licenciaExpiredCount }}</strong> vencida(s)
+                    </div>
+                    <div *ngIf="licenciaExpiringCount > 0" class="text-warning small">
+                      <i class="fi fi-rr-clock me-1"></i> <strong>{{ licenciaExpiringCount }}</strong> próxima(s) a vencer
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"
+              (click)="$event.stopPropagation()"></button>
+
+            <div class="mt-3 p-2 bg-primary bg-opacity-10 rounded">
+              <strong class="d-block mb-2 small">
+                <i class="fi fi-rr-palette me-1"></i> Significado de colores en Documentos Críticos:
+              </strong>
+              <div class="row g-2">
+                <div class="col-6 col-md-3">
+                  <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-25 w-100 py-2">
+                    <i class="fi fi-rr-warning me-1"></i> Vencido
+                  </span>
+                  <small class="d-block text-muted mt-1" style="font-size: 11px;">Fecha ya pasó</small>
+                </div>
+                <div class="col-6 col-md-3">
+                  <span class="badge bg-warning-subtle text-warning border border-warning border-opacity-25 w-100 py-2">
+                    <i class="fi fi-rr-clock me-1"></i> Urgente
+                  </span>
+                  <small class="d-block text-muted mt-1" style="font-size: 11px;">Vence en 7 días o menos</small>
+                </div>
+                <div class="col-6 col-md-3">
+                  <span class="badge bg-info-subtle text-info border border-info border-opacity-25 w-100 py-2">
+                    <i class="fi fi-rr-info-circle me-1"></i> Próximo
+                  </span>
+                  <small class="d-block text-muted mt-1" style="font-size: 11px;">Vence en 8-30 días</small>
+                </div>
+                <div class="col-6 col-md-3">
+                  <span class="badge bg-success-subtle text-success border border-success border-opacity-25 w-100 py-2">
+                    <i class="fi fi-rr-check me-1"></i> Vigente
+                  </span>
+                  <small class="d-block text-muted mt-1" style="font-size: 11px;">Más de 30 días</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+
+          <div class="card-header d-flex align-items-center justify-content-between border-0 pb-0" style="flex-wrap: nowrap;">
+
+
+            <h6 class="card-title mb-0">
+              <ng-container *ngIf="viewMode === 'recent'">
+                Recientes <span class="badge bg-secondary-subtle text-secondary ms-1">10</span>
+              </ng-container>
+
+              <ng-container *ngIf="viewMode === 'expiry-issues'">
+
+              </ng-container>
+            </h6>
+<br>
+
+            <div class="d-flex align-items-center gap-2">
+<div *ngIf="viewMode === 'all' || viewMode === 'expiry-issues'"
+                class="hide-superseded-toggle form-check d-none d-lg-flex align-items-center mb-0">
+                <input class="form-check-input" type="checkbox" id="hide-superseded"
+                  [checked]="hideSuperseded" (change)="toggleHideSuperseded($event)">
+                <label class="form-check-label mb-0" for="hide-superseded">
+                  Ocultar tachadas
+                </label>
+              </div>
+              <button type="button" class="btn btn-secondary waves-effect waves-light" (click)="openSearch()">
+                <i class="fi fi-rr-search text-2xs me-1"></i>
+              </button>
+
+              
+
+
+              <button *ngIf="viewMode !== 'recent'"
+                type="button" class="btn btn-outline-secondary waves-effect waves-light"
+                (click)="showRecent()">
+                <i class="fi fi-rr-arrow-left text-2xs me-1"></i> Recientes
+              </button>
+
+
+              <button *ngIf="viewMode === 'recent'"
+                type="button"
+                class="btn btn-primary waves-effect waves-light"
+                (click)="showAll()">
+                <i class="fi fi-rr-eye text-2xs me-1"></i> Ver todas
+              </button>
+
+              <button *ngIf="viewMode === 'all' && allInspectionsLoaded && showAllWithoutPagination"
+                type="button"
+                class="btn btn-outline-primary waves-effect waves-light"
+                (click)="showAllPaginated()">
+                <i class="fi fi-rr-list text-2xs me-1"></i> Ver con paginación
+              </button>
+
+              <button *ngIf="viewMode === 'all' && allInspectionsLoaded && !showAllWithoutPagination"
+                type="button"
+                class="btn btn-outline-primary waves-effect waves-light"
+                (click)="showAllUnpaginated()">
+                <i class="fi fi-rr-list-check text-2xs me-1"></i> Ver sin paginación
+              </button>
+            </div>
+          </div>
+
+
+          <div class="card-body px-1 pt-2 pb-2">
+            <h6  class="card-title mb-0"  *ngIf="viewMode === 'expiry-issues'"> Con problemas de vigencia  <span class="text-danger">
+                  <i class="fi fi-rr-warning me-1"></i>
+
+                  <span class="badge bg-danger ms-1"> {{ sortedExpiryIssues.length }}</span>
+                </span></h6>
+                <h6  class="card-title mb-0"  *ngIf="viewMode === 'all'"> Mostrando todas las inspecciones  <span class="text-danger">
+                  <i class="fi fi-rr-warning me-1"></i>
+
+                  <span class="badge bg-info ms-1"> {{ sortedAllInspections.length }}</span>
+                </span></h6>
+            <div class="table-responsive-md">
+              <table id="dt_NewCustomers" class="table table-border-bottom-0 mb-0">
+                <thead>
+                  <tr>
+                    <th [class.th-sticky-left]="viewMode !== 'expiry-issues'" style="min-width:110px;">Certificado</th>
+
+                    <th class="minw-75px sortable-header" (click)="sortBy('placa')" [class.active]="isSortedBy('placa')">
+                      Placa
+                      <i class="fi fi-rr-sort" *ngIf="!isSortedBy('placa')"></i>
+                      <i class="fi fi-rr-sort-up" *ngIf="isSortedBy('placa') && sortDirection === 'asc'"></i>
+                      <i class="fi fi-rr-sort-down" *ngIf="isSortedBy('placa') && sortDirection === 'desc'"></i>
+                    </th>
+                    <th class="minw-180px">Teléfono</th>
+                    <th class="minw-200px sortable-header" (click)="sortBy('nombres_conductor')" [class.active]="isSortedBy('nombres_conductor')">
+                      Conductor
+                      <i class="fi fi-rr-sort" *ngIf="!isSortedBy('nombres_conductor')"></i>
+                      <i class="fi fi-rr-sort-up" *ngIf="isSortedBy('nombres_conductor') && sortDirection === 'asc'"></i>
+                      <i class="fi fi-rr-sort-down" *ngIf="isSortedBy('nombres_conductor') && sortDirection === 'desc'"></i>
+                    </th>
+                    <th class="minw-125px sortable-header" (click)="sortBy('fecha_inspeccion')" [class.active]="isSortedBy('fecha_inspeccion')">
+                      Fecha
+                      <i class="fi fi-rr-sort" *ngIf="!isSortedBy('fecha_inspeccion')"></i>
+                      <i class="fi fi-rr-sort-up" *ngIf="isSortedBy('fecha_inspeccion') && sortDirection === 'asc'"></i>
+                      <i class="fi fi-rr-sort-down" *ngIf="isSortedBy('fecha_inspeccion') && sortDirection === 'desc'"></i>
+                    </th>
+                    <th class="sortable-header" (click)="sortBy('estado')" [class.active]="isSortedBy('estado')">
+                      Status
+                      <i class="fi fi-rr-sort" *ngIf="!isSortedBy('estado')"></i>
+                      <i class="fi fi-rr-sort-up" *ngIf="isSortedBy('estado') && sortDirection === 'asc'"></i>
+                      <i class="fi fi-rr-sort-down" *ngIf="isSortedBy('estado') && sortDirection === 'desc'"></i>
+                    </th>
+                    <th>Documentos Críticos</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+
+
+                  <ng-container *ngIf="viewMode === 'recent'">
+                    <tr *ngFor="let inspection of sortedRecentInspections" class="inspection-row"
+                      [class.inspection-superseded]="isSupersededByNewerInspection(inspection)">
+                      <ng-container *ngTemplateOutlet="inspectionRow; context: { $implicit: inspection }"></ng-container>
+                    </tr>
+                    <tr *ngIf="sortedRecentInspections.length === 0">
+                      <td colspan="8" class="text-center py-4 text-muted">
+                        <span class="spinner-border spinner-border-sm me-2"></span> Cargando inspecciones...
+                      </td>
+                    </tr>
+                  </ng-container>
+
+
+                  <ng-container *ngIf="viewMode === 'all'">
+                    <tr *ngIf="!allInspectionsLoaded">
+                      <td colspan="8" class="text-center py-4 text-muted">
+                        <span class="spinner-border spinner-border-sm me-2"></span> Descargando inspecciones...
+                      </td>
+                    </tr>
+                    <ng-container *ngIf="allInspectionsLoaded && showAllWithoutPagination">
+                      <tr *ngFor="let inspection of sortedAllInspections" class="inspection-row"
+                        [class.inspection-superseded]="isSupersededByNewerInspection(inspection)">
+                        <ng-container *ngTemplateOutlet="inspectionRow; context: { $implicit: inspection }"></ng-container>
+                      </tr>
+                    </ng-container>
+                    <ng-container *ngIf="allInspectionsLoaded && !showAllWithoutPagination">
+                      <tr *ngFor="let inspection of pagedInspections" class="inspection-row"
+                        [class.inspection-superseded]="isSupersededByNewerInspection(inspection)">
+                        <ng-container *ngTemplateOutlet="inspectionRow; context: { $implicit: inspection }"></ng-container>
+                      </tr>
+                    </ng-container>
+                    <tr *ngIf="allInspectionsLoaded && sortedAllInspections.length === 0">
+                      <td colspan="8" class="text-center py-4 text-muted">No hay inspecciones.</td>
+                    </tr>
+                  </ng-container>
+
+
+                  <ng-container *ngIf="viewMode === 'expiry-issues'">
+                    <tr *ngFor="let inspection of sortedExpiryIssues" class="inspection-row"
+                      [class.inspection-superseded]="isSupersededByNewerInspection(inspection)">
+                      <ng-container *ngTemplateOutlet="inspectionRow; context: { $implicit: inspection }"></ng-container>
+                    </tr>
+                    <tr *ngIf="sortedExpiryIssues.length === 0">
+                      <td colspan="8" class="text-center py-4 text-success">
+                        <i class="fi fi-rr-check-circle me-2"></i>
+                        No hay inspecciones con problemas de vigencia.
+                      </td>
+                    </tr>
+                  </ng-container>
+
+                </tbody>
+              </table>
+            </div>
+
+
+            <div *ngIf="viewMode === 'all' && allInspectionsLoaded && totalPages > 1"
+              class="d-flex align-items-center justify-content-between px-3 pt-3 pb-1">
+              <small class="text-muted" *ngIf="showAllWithoutPagination">
+                Mostrando {{ sortedAllInspections.length }} inspecciones sin paginación
+              </small>
+              <small class="text-muted" *ngIf="!showAllWithoutPagination">
+                Mostrando {{ (currentPage - 1) * pageSize + 1 }}–{{ Math.min(currentPage * pageSize, sortedAllInspections.length) }}
+                de {{ sortedAllInspections.length }}
+              </small>
+              <nav aria-label="Paginación" *ngIf="!showAllWithoutPagination">
+                <ul class="pagination pagination-sm mb-0">
+                  <li class="page-item" [class.disabled]="currentPage === 1">
+                    <a class="page-link" (click)="goToPage(currentPage - 1)" style="cursor:pointer;">
+                      <i class="fi fi-rr-angle-left"></i>
+                    </a>
+                  </li>
+                  <ng-container *ngFor="let p of pagesArray">
+
+                    <li *ngIf="p === 1 || p === totalPages || (p >= currentPage - 2 && p <= currentPage + 2)"
+                      class="page-item" [class.active]="p === currentPage">
+                      <a class="page-link" (click)="goToPage(p)" style="cursor:pointer;">{{ p }}</a>
+                    </li>
+                    <li *ngIf="(p === currentPage - 3 && p > 1) || (p === currentPage + 3 && p < totalPages)"
+                      class="page-item disabled">
+                      <span class="page-link">…</span>
+                    </li>
+                  </ng-container>
+                  <li class="page-item" [class.disabled]="currentPage === totalPages">
+                    <a class="page-link" (click)="goToPage(currentPage + 1)" style="cursor:pointer;">
+                      <i class="fi fi-rr-angle-right"></i>
+                    </a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+  </div>
+
+
+  <ng-template #inspectionRow let-inspection>
+
+
+    <td [class.td-sticky-left]="viewMode !== 'expiry-issues'" style="min-width:110px;" (click)="viewInspection(inspection.id)">
+      <span class="badge bg-primary-subtle text-primary border border-primary border-opacity-25 px-2 py-1"
+        *ngIf="inspection.numero_certificado; else sinCert">
+        {{ inspection.numero_certificado }}
+      </span>
+      <ng-template #sinCert>
+        <span class="text-muted small">—</span>
+      </ng-template>
+    </td>
+
+
+    <td *ngIf="viewMode === 'expiry-issues' "
+      [class.td-sticky-vigencia]="viewMode !== 'expiry-issues'"
+      [class.td-vigencia-expiry]="viewMode === 'expiry-issues'"
+      (click)="viewInspection(inspection.id)">
+      <div class="d-flex flex-column gap-1">
+        <span [ngClass]="{
+          'text-danger fw-bold': isExpired(inspection.fecha_vigencia),
+          'text-warning fw-semibold': isExpiringSoon(inspection.fecha_vigencia)
+        }">
+          {{ (inspection.fecha_vigencia | date: 'dd/MM/yyyy':'UTC') || 'Sin vigencia' }}
+        </span>
+        <small class="text-muted" *ngIf="getDaysUntilExpiry(inspection.fecha_vigencia) !== null">
+          <span *ngIf="getDaysUntilExpiry(inspection.fecha_vigencia)! < 0" class="text-danger">
+            Inspección Venció hace {{ Math.abs(getDaysUntilExpiry(inspection.fecha_vigencia)!) }} días
+          </span>
+          <span *ngIf="getDaysUntilExpiry(inspection.fecha_vigencia)! >= 0 && getDaysUntilExpiry(inspection.fecha_vigencia)! <= 7"
+            class="text-danger fw-semibold">
+           Inspección Vence en {{ getDaysUntilExpiry(inspection.fecha_vigencia)! }} días
+          </span>
+          <span *ngIf="getDaysUntilExpiry(inspection.fecha_vigencia)! > 7 && getDaysUntilExpiry(inspection.fecha_vigencia)! <= 30"
+            class="text-warning">
+          Inspección  Vence en {{ getDaysUntilExpiry(inspection.fecha_vigencia)! }} días
+          </span>
+        </small>
+
+        <ng-container *ngIf="viewMode === 'expiry-issues'">
+          <ng-container *ngFor="let alert of getExpiryAlerts(inspection)">
+            <span *ngIf="alert.diff < 0"
+              class="badge bg-danger-subtle text-danger border border-danger border-opacity-25 py-1 px-2 mt-1"
+              style="white-space: normal; text-align: left; font-size: 11px;">
+              <i class="fi fi-rr-warning me-1"></i>
+              <strong>{{ alert.label }}</strong>: venció hace {{ Math.abs(alert.diff) }} día(s)
+            </span>
+            <span *ngIf="alert.diff === 0"
+              class="badge bg-danger-subtle text-danger border border-danger border-opacity-25 py-1 px-2 mt-1"
+              style="white-space: normal; text-align: left; font-size: 11px;">
+              <i class="fi fi-rr-warning me-1"></i>
+              <strong>{{ alert.label }}</strong>: vence hoy
+            </span>
+            <span *ngIf="alert.diff > 0 && alert.diff <= 7"
+              class="badge bg-warning-subtle text-warning border border-warning border-opacity-25 py-1 px-2 mt-1"
+              style="white-space: normal; text-align: left; font-size: 11px;">
+              <i class="fi fi-rr-clock me-1"></i>
+              <strong>{{ alert.label }}</strong>: vence en {{ alert.diff }} día(s)
+            </span>
+            <span *ngIf="alert.diff > 7 && alert.diff < 30"
+              class="badge bg-info-subtle text-info border border-info border-opacity-25 py-1 px-2 mt-1"
+              style="white-space: normal; text-align: left; font-size: 11px;">
+              <i class="fi fi-rr-info-circle me-1"></i>
+              <strong>{{ alert.label }}</strong>: vence en {{ alert.diff }} día(s)
+            </span>
+          </ng-container>
+        </ng-container>
+      </div>
+    </td>
+
+
+    <td (click)="viewInspection(inspection.id)">{{ inspection.placa || 'Sin placa' }}
+
+
+
+    </td>
+
+
+    <td>
+      <div class="phone-cell">
+        <div class="d-flex align-items-center mb-1">
+          <i class="fi fi-rr-phone me-2 text-primary"></i>
+          <span>{{ formatPhone(inspection.telefono) }}</span>
+          <a *ngIf="inspection.whatsapp"
+            [href]="'https://wa.me/57' + inspection.telefono?.replace(/\D/g, '')" target="_blank"
+            class="whatsapp-link btn btn-sm btn-success-subtle" title="Contactar por WhatsApp">
+            <i class="fi fi-brands-whatsapp me-1"></i>
+          </a>
+        </div>
+      </div>
+    </td>
+
+
+    <td (click)="viewInspection(inspection.id)">
+      <div class="d-flex align-items-center">
+        <div class="avatar avatar-xxs rounded-circle me-2">
+          <img [src]="inspection.foto_conductor || 'assets/images/avatar/avatar2.webp'"
+            alt="Foto del conductor" class="img-fluid">
+        </div>
+        {{ inspection.nombres_conductor || 'Sin nombre' }}
+      </div>
+    </td>
+
+
+    <td (click)="viewInspection(inspection.id)">
+      {{ (inspection.fecha_inspeccion | date: 'dd/MM/yyyy':'UTC') || 'Sin fecha' }}
+    </td>
+
+
+    <td (click)="viewInspection(inspection.id)">
+      <span class="badge badge-lg" [ngClass]="{
+        'bg-success-subtle text-success': inspection.estado === 'aprobada',
+        'bg-warning-subtle text-warning': inspection.estado === 'borrador',
+        'bg-danger-subtle text-danger': inspection.estado === 'rechazada',
+        'bg-primary-subtle text-primary': !inspection.estado
+      }">
+        {{ inspection.estado || 'borrador' | titlecase }}
+      </span>
+    </td>
+
+
+    <td>
+      <div class="d-flex flex-column gap-1">
+        <span class="badge badge-sm" [ngClass]="getDocumentStatusClass(inspection.fecha_vencimiento_soat)"
+          *ngIf="inspection.fecha_vencimiento_soat" title="SOAT">
+          <i class="fi fi-rr-file me-1"></i>SOAT
+        </span>
+        <span class="badge badge-sm" [ngClass]="getDocumentStatusClass(inspection.fecha_vencimiento_revision_tecnomecanica)"
+          *ngIf="inspection.fecha_vencimiento_revision_tecnomecanica" title="Tecnomecánica">
+          <i class="fi fi-rr-file me-1"></i>Tecno
+        </span>
+        <span class="badge badge-sm" [ngClass]="getDocumentStatusClass(inspection.licencia_vencimiento)"
+          *ngIf="inspection.licencia_vencimiento" title="Licencia">
+          <i class="fi fi-rr-file me-1"></i>Licencia
+        </span>
+        <span class="text-muted small"
+          *ngIf="!inspection.fecha_vencimiento_soat && !inspection.fecha_vencimiento_revision_tecnomecanica && !inspection.licencia_vencimiento">
+          Sin datos
+        </span>
+      </div>
+    </td>
+
+
+    <td class="actions-column">
+      <div class="btn-group float-end" (click)="$event.stopPropagation()">
+        <button class="btn btn-subtle-primary btn-sm btn-shadow btn-icon waves-effect dropdown-toggle"
+          type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="fi fi-rr-menu-dots"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li>
+            <a class="dropdown-item" [routerLink]="['/detail', inspection.id]"
+              (click)="$event.stopPropagation()">
+              <i class="fi fi-rr-edit me-2"></i>Editar
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item text-danger" href="javascript:void(0);"
+              (click)="$event.stopPropagation(); deleteInspection(inspection.id)">
+              <i class="fi fi-rr-trash me-2"></i>Eliminar
+            </a>
+          </li>
+        </ul>
+      </div>
+    </td>
+
+  </ng-template>
+
+
+  <div class="floating-action d-lg-none">
+    <input type="checkbox" id="fab-check" class="fab-check">
+    <label class="fab" for="fab-check">
+      <span class="fab-icon">+</span>
+      <span class="fab-icon-close">×</span>
+    </label>
+    <div class="fab-options">
+      <a routerLink="/nueva" class="fab-option">
+        <span class="fab-label ">Busetas</span>
+        <span class="fab-option-icon ">1</span>
+      </a>
+      <a routerLink="/nueva" class="fab-option">
+        <span class="fab-label">Camioneta</span>
+        <span class="fab-option-icon">2</span>
+      </a>
+    </div>
+  </div>
+
+  <style>
+    .floating-action {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 1000;
+    }
+
+    .fab {
+      width: 56px;
+      height: 56px;
+      background-color: var(--bs-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2rem;
+      font-weight: 300;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      user-select: none;
+      position: relative;
+    }
+
+    .fab:hover { transform: scale(1.1); }
+
+    .fab-icon-close {
+      position: absolute;
+      opacity: 0;
+      transform: rotate(-45deg);
+      transition: all 0.3s ease;
+    }
+
+    .fab-check:checked+.fab .fab-icon { opacity: 0; transform: rotate(45deg); }
+    .fab-check:checked+.fab .fab-icon-close { opacity: 1; transform: rotate(0); }
+    .fab-check { display: none; }
+
+    .fab-options {
+      position: absolute;
+      bottom: 70px;
+      right: 0;
+      opacity: 0;
+      transform: scale(0);
+      transform-origin: bottom right;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .fab-check:checked~.fab-options { opacity: 1; transform: scale(1); }
+
+    .fab-option {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      text-decoration: none;
+      color: #333;
+    }
+
+    .fab-label {
+      background: white;
+      padding: 8px 12px;
+      border-radius: 20px;
+      margin-right: 10px;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .fab-option-icon {
+      width: 40px;
+      height: 40px;
+      background-color: var(--bs-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    @media (min-width: 992px) { .floating-action { display: none; } }
+
+
+    .th-sticky-left,
+    .td-sticky-left {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      background: #fff;
+      border-right: 1px solid var(--bs-border-color, #dee2e6);
+      white-space: nowrap;
+    }
+
+    .th-sticky-left { z-index: 3; }
+
+
+    .th-sticky-vigencia,
+    .td-sticky-vigencia {
+      position: sticky;
+      left: 110px;
+      z-index: 2;
+      background: #fff;
+      border-right: 1px solid var(--bs-border-color, #dee2e6);
+      min-width: 274px;
+    }
+
+
+    .th-vigencia-expiry,
+    .td-vigencia-expiry {
+      min-width: 274px;
+    }
+
+    .th-sticky-vigencia { z-index: 3; }
+
+
+    .inspection-row:hover .td-sticky-left,
+    .inspection-row:hover .td-sticky-vigencia {
+      background: var(--bs-table-hover-bg, #f8f9fa);
+    }
+
+
+    .th-sticky-left::after,
+    .td-sticky-left::after,
+    .th-sticky-vigencia::after,
+    .td-sticky-vigencia::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: -6px;
+      width: 6px;
+      height: 100%;
+      background: linear-gradient(to left, transparent, rgba(0,0,0,0.07));
+      pointer-events: none;
+    }
+  </style>
+</main>
