@@ -1,6 +1,6 @@
 export const environment = {
     production: false,
-    pocketbaseUrl: 'https://db.buckapi.site:online/',
+    pocketbaseUrl: 'https://db.buckapi.online:8095/',
     gotenbergBaseUrl: 'https://gotenberg.buckapi.online',
     gotenbergUsername: 'tremaine.bogisich-reichert',
     gotenbergPassword: 'zdbdb0zoq2nqy73t',
