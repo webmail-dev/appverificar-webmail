@@ -1,60 +1,27 @@
 # Despliegue
 
-## Frontend estatico
+La guia operativa vigente esta en:
 
-Publicar el contenido generado por Angular:
+- [Despliegue con Dokploy Compose](../deployment.md)
+- [Dokploy, dominios, HTTPS y Traefik](../dokploy.md)
+- [Docker y Nginx](../docker.md)
+- [Troubleshooting](../troubleshooting.md)
+
+## Resumen vigente
+
+El proyecto se despliega con Docker Compose en Dokploy. La imagen usa `nginx:alpine` y sirve el build Angular ya compilado desde:
 
 ```text
 dist/verificar-app/browser
 ```
 
-El hosting debe servir assets estaticos y redirigir rutas SPA a `index.html`.
-
-```text
-/<*> -> /index.html -> 200
-```
-
-## Build de aplicacion
+Docker no ejecuta `npm install` ni `npm run build`. Antes de construir la imagen se debe generar el build:
 
 ```bash
-npm ci
+npm install
 npm run build
+docker compose config
+docker compose build
 ```
 
-## Build de documentacion
-
-```bash
-npm run docs:build
-```
-
-La salida de VitePress queda en:
-
-```text
-docs/.vitepress/dist
-```
-
-## PocketBase
-
-- Servir detras de HTTPS.
-- Persistir y respaldar `pb_data`.
-- Importar o validar `docs/pb_schema.json` antes de liberar.
-- Versionar schema y reglas despues de cada cambio operativo.
-- Restringir CORS al dominio de la aplicacion.
-
-## Gotenberg
-
-- Imagen recomendada: `gotenberg/gotenberg:8`.
-- Dominio HTTPS.
-- Basic Auth, red privada o proteccion equivalente.
-- Limite de request suficiente para XLSX con imagenes.
-- Preferible exponerlo mediante backend/proxy para ocultar credenciales al navegador.
-
-## Seguridad
-
-- Mantener credenciales y tokens fuera del bundle Angular.
-- Usar HTTPS en frontend, PocketBase y conversion PDF.
-- Aplicar reglas de lectura/escritura por coleccion en PocketBase.
-- Aplicar CORS estricto.
-- Agregar control server-side para permisos criticos.
-- Auditar assets en `public/assets` antes de publicar.
-
+En Dokploy el servicio se configura como Compose, usando `docker-compose.yml`, dominio publico, HTTPS y puerto interno `80`.

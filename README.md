@@ -1,117 +1,275 @@
-<p align="center">
-  <img src="docs/logo.svg" alt="VerificarIT" width="92">
-</p>
+# VerificarIT
 
-<h1 align="center">VerificarIT</h1>
+PWA Angular para gestionar inspecciones vehiculares, evidencias, vencimientos documentales y reportes PDF.
 
-<p align="center">
-  <strong>PWA Angular para gestionar inspecciones vehiculares, evidencias, vencimientos y reportes PDF.</strong>
-</p>
+## Indice
 
-<p align="center">
-  <img alt="Angular 21" src="https://img.shields.io/badge/Angular-21-DD0031?logo=angular&logoColor=white">
-  <img alt="TypeScript 5.9" src="https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white">
-  <img alt="PocketBase" src="https://img.shields.io/badge/Backend-PocketBase-B8DBE4">
-  <img alt="PWA" src="https://img.shields.io/badge/PWA-ready-5A0FC8?logo=pwa&logoColor=white">
-</p>
+- [Descripcion](#descripcion)
+- [Arquitectura](#arquitectura)
+- [Tecnologias](#tecnologias)
+- [Requisitos](#requisitos)
+- [Instalacion](#instalacion)
+- [Compilacion](#compilacion)
+- [Despliegue](#despliegue)
+- [Dokploy](#dokploy)
+- [Docker](#docker)
+- [PWA](#pwa)
+- [Estructura](#estructura)
+- [Scripts](#scripts)
+- [Troubleshooting](#troubleshooting)
+- [Documentacion](#documentacion)
+- [Contribucion](#contribucion)
+- [Licencia](#licencia)
 
-<p align="center">
-  <a href="https://maproute39-hue.github.io/verificar/">Documentación técnica</a>
-  ·
-  <a href="https://github.com/maproute39-hue/verificar/blob/main/docs/pb_schema.json" >Schema PocketBase</a>
-  ·
-  <a href="https://github.com/maproute39-hue/verificar">Repositorio</a>
-</p>
+## Descripcion
 
-## Descripción
+VerificarIT es un frontend Angular/PWA para operacion de inspecciones vehiculares. La aplicacion permite iniciar sesion, crear inspecciones nuevas o heredadas, consultar historial por placa, administrar evidencias, registrar firmas, controlar vencimientos y generar certificados PDF desde una plantilla Excel.
 
-VerificarIT es un frontend Angular/PWA para la gestión de inspecciones vehiculares. Permite autenticar usuarios, crear inspecciones, consultar historial por placa, registrar firmas y fotografías, controlar vencimientos documentales y generar reportes PDF desde una plantilla Excel.
+El repositorio no contiene backend Node. La aplicacion compilada se sirve como SPA estatica dentro de Nginx y consume servicios externos definidos por configuracion runtime:
 
-La aplicación se ejecuta como frontend estático y consume servicios externos:
+- PocketBase para autenticacion, datos, archivos y realtime.
+- Gotenberg, o un proxy PDF compatible, para convertir XLSX/HTML a PDF.
+- `public/config/app-config.js` para endpoints publicos de runtime.
 
-- PocketBase para autenticación, datos, archivos y realtime.
-- Gotenberg para conversión de reportes XLSX/HTML a PDF.
-- Configuración runtime mediante `public/config/app-config.js`.
+## Arquitectura
 
-## Funcionalidades
+```mermaid
+flowchart TD
+    U[Usuario / PWA] --> T[Traefik en Dokploy]
+    T --> N[Nginx Alpine]
+    N --> A[Angular compilado<br/>dist/verificar-app/browser]
+    A --> PB[PocketBase]
+    A --> PDF[Gotenberg o proxy PDF]
+```
 
-- Login con PocketBase.
-- Home con métricas, búsqueda por placa, alertas, 10 inspecciones recientes y carga completa bajo demanda.
-- Creación de inspecciones nuevas o heredadas desde una inspección base.
-- Identificación visual de inspecciones reemplazadas por una heredada anterior de la misma placa.
-- Edición, detalle y eliminación de inspecciones.
-- Captura de firmas de conductor e inspector.
-- Carga y consulta de fotografías de evidencia.
-- Estados de inspección: `borrador`, `aprobada`, `rechazada`.
-- Alertas de vencimiento para SOAT, tecnomecánica, licencia, tarjeta de operación y vigencia, ordenadas por antigüedad del vencimiento cuando se consultan desde el Home.
-- Generación de PDF con datos, firmas e imágenes.
-- Soporte PWA con manifest y service worker de Angular.
+El contenedor de produccion no compila Angular. `Dockerfile` copia el contenido ya generado en `dist/verificar-app/browser` hacia `/usr/share/nginx/html` y arranca `nginx:alpine`.
 
-## Stack
+La configuracion de Nginx hace tres cosas criticas:
 
-| Capa | Tecnología |
-|---|---|
-| Frontend | Angular 21, standalone components |
-| Lenguaje | TypeScript 5.9 |
-| PWA | `@angular/service-worker`, `ngsw-config.json`, `public/manifest.json` |
-| Datos/Auth | PocketBase |
-| Realtime | PocketBase realtime subscriptions |
-| Formularios | Angular Forms / Reactive Forms |
-| Firmas | `@almothafar/angular-signature-pad` |
-| Reportes | ExcelJS, xlsx, file-saver, Gotenberg |
-| UI | Assets locales en `public/assets` |
+- Sirve archivos estaticos del build Angular.
+- Redirige rutas SPA a `index.html` mediante `try_files`.
+- Ajusta cache para `index.html`, `manifest.json`, `ngsw.json` y workers PWA.
+
+Mas detalle: [docs/architecture.md](docs/architecture.md).
+
+## Tecnologias
+
+- Angular 21 con standalone components.
+- TypeScript 5.9.
+- Angular Service Worker y `ngsw-config.json`.
+- PocketBase SDK.
+- ExcelJS, `xlsx` y `file-saver` para reportes.
+- Gotenberg para conversion PDF.
+- Docker Compose.
+- Nginx Alpine.
+- Dokploy Compose con Traefik gestionado por Dokploy.
+- VitePress para documentacion tecnica.
 
 ## Requisitos
 
 - Node.js `>=20.19` o `>=22.12`.
 - npm `>=10`.
-- PocketBase accesible por HTTPS.
-- Gotenberg o un proxy de conversión PDF accesible por HTTPS.
+- Docker con Compose v2 para pruebas locales de imagen.
+- Acceso a PocketBase por HTTPS.
+- Acceso a Gotenberg o proxy PDF por HTTPS.
+- Proyecto Dokploy con repositorio GitHub conectado para despliegue.
 
-## Instalación
+## Instalacion
 
 ```bash
-npm ci
+npm install
 ```
 
-## Configuración
+> El flujo solicitado para este proyecto usa `npm install`. Si se necesita una instalacion reproducible en CI, validar primero el `package-lock.json` y usar `npm ci`.
 
-La app lee configuración runtime desde `public/config/app-config.js` y usa `src/environments/*` como fallback.
+## Configuracion
+
+La aplicacion lee configuracion publica desde `public/config/app-config.js` y usa `src/environments/*` como fallback.
 
 ```js
 window.__APP_CONFIG__ = {
-  pocketbaseUrl: 'https://db.example.com',
-  gotenbergBaseUrl: 'https://pdf.example.com',
-  imagesCollectionId: 'collection_id'
+  pocketbaseUrl: '',
+  gotenbergBaseUrl: 'https://gotenberg.buckapi.online',
+  imagesCollectionId: '5bjt6wpqfj0rnsl'
 };
 ```
 
-No incluir secretos en el bundle Angular. Si Gotenberg requiere autenticación, debe resolverse desde un proxy/backend o desde la infraestructura de despliegue.
+No poner secretos en Angular, `public/`, variables de build frontend ni archivos servidos por Nginx. Todo lo que llega al navegador debe considerarse publico.
 
-## Comandos
-
-```bash
-npm start
-```
-
-Levanta el servidor de desarrollo en:
-
-```text
-http://localhost:4200
-```
+## Compilacion
 
 ```bash
-npx tsc -p tsconfig.app.json --noEmit
 npm run build
 ```
 
-El build productivo queda en:
+Verificar que exista la salida usada por Docker:
 
-```text
-dist/verificar-app/browser
+```bash
+ls dist/verificar-app/browser
 ```
 
-### Documentación
+Archivos esperados despues del build actual:
+
+- `index.html`
+- `manifest.json`
+- `ngsw.json`
+- `ngsw-worker.js`
+- `safety-worker.js`
+- bundles JavaScript y CSS con hash
+- assets copiados desde `public/`
+
+## Despliegue
+
+Flujo completo:
+
+```mermaid
+flowchart LR
+    A[npm install] --> B[npm run build]
+    B --> C[verificar dist/verificar-app/browser]
+    C --> D[docker compose build]
+    D --> E[commit y push]
+    E --> F[Dokploy Compose]
+    F --> G[Traefik + HTTPS]
+```
+
+Pasos locales:
+
+```bash
+npm install
+npm run build
+ls dist/verificar-app/browser
+docker compose config
+docker compose build
+docker compose up -d
+docker compose logs
+```
+
+Cuando el contenedor local este validado:
+
+```bash
+git status
+git add README.md docs
+git commit -m "docs: update dokploy deployment guide"
+git push
+```
+
+No se debe ejecutar `docker compose build` antes de `npm run build`, porque `.dockerignore` excluye `src`, `public`, `package.json`, `package-lock.json` y `angular.json`. La imagen solo recibe `dist/verificar-app/browser`, `Dockerfile`, `docker-compose.yml` y `nginx.conf`.
+
+Guia completa: [docs/deployment.md](docs/deployment.md).
+
+## Dokploy
+
+En Dokploy:
+
+1. Crear un servicio Compose.
+2. Seleccionar GitHub como fuente.
+3. Seleccionar el repositorio y la rama.
+4. Seleccionar `docker-compose.yml`.
+5. Ejecutar deploy.
+6. Configurar dominio.
+7. Usar puerto interno `80`.
+8. Activar HTTPS.
+9. Dejar que Traefik enrute el dominio hacia el servicio.
+10. Ejecutar redeploy cuando haya nuevos commits.
+
+Dokploy administra Traefik fuera de este repositorio. Por eso `docker-compose.yml` no contiene labels de Traefik ni certificados. El compose solo define el servicio `web`, la construccion local de imagen y el puerto interno expuesto.
+
+Mas detalle: [docs/dokploy.md](docs/dokploy.md).
+
+## Docker
+
+Archivos reales del despliegue:
+
+- `Dockerfile`
+- `docker-compose.yml`
+- `nginx.conf`
+- `.dockerignore`
+
+Resumen del contenedor:
+
+```dockerfile
+FROM nginx:alpine
+COPY dist/verificar-app/browser/ /usr/share/nginx/html/
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+```
+
+Mas detalle: [docs/docker.md](docs/docker.md).
+
+## PWA
+
+La PWA esta habilitada en produccion con:
+
+- `@angular/service-worker`.
+- `provideServiceWorker('ngsw-worker.js')`.
+- `serviceWorker: "ngsw-config.json"` en `angular.json`.
+- `public/manifest.json`.
+- Iconos y screenshots bajo `public/assets`.
+- Reglas de cache en `ngsw-config.json`.
+- Reglas de cache HTTP en `nginx.conf` para `manifest.json`, `ngsw.json` y workers.
+
+Mas detalle: [docs/pwa.md](docs/pwa.md).
+
+## Estructura
+
+```text
+.
+├── Dockerfile
+├── docker-compose.yml
+├── nginx.conf
+├── .dockerignore
+├── angular.json
+├── ngsw-config.json
+├── package.json
+├── public/
+│   ├── config/app-config.js
+│   ├── manifest.json
+│   └── assets/
+├── src/
+│   └── app/
+├── dist/verificar-app/browser/
+└── docs/
+```
+
+## Scripts
+
+```bash
+npm start
+npm run build
+npm run watch
+npm test
+npm run docs:dev
+npm run docs:build
+npm run docs:preview
+```
+
+El servidor de desarrollo Angular se abre en `http://localhost:4200`.
+
+## Troubleshooting
+
+Errores frecuentes:
+
+- `COPY dist/verificar-app/browser/ failed`: falta ejecutar `npm run build`.
+- Rutas como `/home` devuelven 404: revisar `nginx.conf` y `try_files $uri $uri/ /index.html`.
+- PWA no actualiza: verificar que `ngsw.json` y `ngsw-worker.js` no queden cacheados.
+- Dominio sin HTTPS en Dokploy: revisar DNS, dominio asignado, puerto interno `80` y estado de Traefik.
+- PDF falla: validar `gotenbergBaseUrl` o proxy PDF en `public/config/app-config.js`.
+
+Guia completa: [docs/troubleshooting.md](docs/troubleshooting.md).
+
+## Documentacion
+
+Documentos principales:
+
+- [Arquitectura](docs/architecture.md)
+- [Despliegue](docs/deployment.md)
+- [Dokploy](docs/dokploy.md)
+- [Docker](docs/docker.md)
+- [PWA](docs/pwa.md)
+- [Movil](docs/mobile.md)
+- [Troubleshooting](docs/troubleshooting.md)
+
+La documentacion VitePress existente tambien vive en `docs/`:
 
 ```bash
 npm run docs:dev
@@ -119,156 +277,15 @@ npm run docs:build
 npm run docs:preview
 ```
 
-La documentación usa VitePress y vive en `docs/`. El build estático queda en `docs/.vitepress/dist`.
+## Contribucion
 
-## Estructura
+Antes de abrir cambios:
 
-```text
-.
-├── docs/
-│   ├── index.md
-│   ├── .vitepress/
-│   ├── guia/
-│   ├── arquitectura/
-│   ├── funcionalidades/
-│   ├── flujos/
-│   ├── modelos/
-│   ├── despliegue/
-│   ├── changelog.md
-│   └── pb_schema.json
-├── public/
-│   ├── config/app-config.js
-│   ├── manifest.json
-│   └── assets/
-│       └── templates/
-│           ├── inspection.xlsx
-│           └── resultado.pdf
-├── src/
-│   ├── environments/
-│   └── app/
-│       ├── components/
-│       ├── config/
-│       ├── models/
-│       ├── pages/
-│       ├── services/
-│       ├── app.config.ts
-│       └── app.routes.ts
-├── angular.json
-├── ngsw-config.json
-├── package.json
-└── tsconfig*.json
-```
+1. Mantener el alcance del cambio separado entre codigo y documentacion.
+2. Ejecutar `npm run build` si se modifica Angular, PWA o assets.
+3. Ejecutar `docker compose config` si se modifica Docker o Compose.
+4. Actualizar `docs/` y este README cuando cambie el despliegue.
 
-## Rutas
+## Licencia
 
-| Ruta | Propósito |
-|---|---|
-| `/login` | Autenticación de usuario. |
-| `/home` | Home operativo, métricas, búsqueda, alertas, recientes e historial completo bajo demanda. |
-| `/nueva` | Creación de inspección. |
-| `/heredada` | Creación de inspección desde una base existente. |
-| `/inspections` | Listado general con búsqueda y eliminación. |
-| `/detail/:id` | Detalle, edición, evidencias, firmas y PDF. |
-
-## Servicios Principales
-
-| Servicio | Responsabilidad |
-|---|---|
-| `AuthService` | Login, logout, usuario actual y recuperación de contraseña. |
-| `InspectionService` | CRUD de inspecciones, imágenes, secuencias y URLs de archivos. |
-| `RealtimeInspectionsService` | Suscripciones realtime, caché local y carga progresiva. |
-| `ExcelExportService` | Generación de XLSX y PDF desde plantilla. |
-| `GotenbergService` | Conversión XLSX/HTML a PDF y descarga de blobs. |
-| `PwaInstallService` | Instalación PWA desde `beforeinstallprompt`. |
-
-## Home De Inspecciones
-
-El Home prioriza una carga inicial rápida y deja la carga completa para cuando el usuario la necesita:
-
-1. Al entrar en `/home`, se consultan y muestran únicamente las 10 inspecciones más recientes.
-2. El orden inicial es `created` descendente; no se usa `fecha_vigencia` para ordenar la vista inicial.
-3. El botón **Ver todas** cambia a modo completo, carga todas las inspecciones si todavía no están disponibles y las muestra por defecto sin paginación.
-4. En modo completo se conserva la paginación opcional. El usuario puede alternar entre **Ver con paginación** y **Ver sin paginación**; la paginación usa `currentPage`, `pageSize`, `totalPages`, `pagesArray`, `goToPage()` y `pagedInspections`.
-5. La vista **Problemas de vigencia** muestra inspecciones afectadas por vigencias o documentos críticos y ordena por `fecha_vigencia` ascendente según la diferencia contra la fecha actual. Las inspecciones más vencidas aparecen primero.
-
-### Inspecciones Heredadas Y Reemplazadas
-
-Una inspección heredada crea un nuevo registro a partir de una inspección base. En los listados del Home, las inspecciones se agrupan conceptualmente por placa normalizada (`trim` + `uppercase`) para detectar reemplazos.
-
-- Si una placa aparece una sola vez, no se marca como reemplazada.
-- Si una placa tiene varias inspecciones, la inspección vigente visualmente es la más reciente por `created`.
-- Las inspecciones anteriores de la misma placa se muestran con línea roja y menor opacidad mediante la clase `inspection-superseded`.
-- Los botones de acción se mantienen visibles, sin tachado y funcionales.
-- En escritorio, el control **Ocultar tachadas** permite ocultar temporalmente las reemplazadas en las vistas **Todas** y **Problemas de vigencia**. Es un filtro visual: no elimina registros, no modifica PocketBase y no afecta búsqueda, estadísticas ni creación de heredadas.
-
-## Modelo De Datos
-
-El esquema de PocketBase está versionado en `docs/pb_schema.json`. Las colecciones principales son:
-
-| Colección | Uso |
-|---|---|
-| `users` | Autenticación y perfil de usuario. |
-| `inspections` | Registro principal de inspecciones vehiculares. |
-| `images` | Evidencias fotográficas asociadas a inspecciones. |
-| `secuencias` | Consecutivos por tipo y prefijo. |
-| `files` | Archivos auxiliares. |
-| `firmas` | Evidencias de firma por certificado. |
-
-### URLs Del Registro Fotográfico
-
-El campo `inspections.images` guarda un arreglo de IDs de registros de la colección `images`:
-
-```json
-[
-  "9ls9qrjwf1g3bpn",
-  "vxq99ciwv8tsbqy"
-]
-```
-
-Para presentar las imágenes en la vista de detalle no se debe usar el ID directamente. Por cada ID se consulta el registro correspondiente en `images`, se toma el nombre del archivo desde el campo file `image` y se construye la URL pública de PocketBase:
-
-```text
-{pocketbaseUrl}/api/files/{imagesCollectionId}/{imageRecordId}/{filename}?token=
-```
-
-Ejemplo:
-
-```text
-https://db.buckapi.site:8095/api/files/5bjt6wpqfj0rnsl/9ls9qrjwf1g3bpn/food_logo_17JobGcIp4.svg?token=
-```
-
-## Documentación
-
-La documentación técnica VitePress está en:
-
-```text
-docs/index.md
-```
-
-Para ejecutarla localmente:
-
-```bash
-npm run docs:dev
-```
-
-El schema importable/exportable de PocketBase está en:
-
-```text
-docs/pb_schema.json
-```
-
-## Despliegue
-
-Para hosting estático, publicar el contenido de:
-
-```text
-dist/verificar-app/browser
-```
-
-El servidor debe redirigir las rutas SPA a `index.html`, por ejemplo:
-
-```text
-/<*> -> /index.html -> 200
-```
-
-Antes de producción, validar HTTPS, CORS, reglas de PocketBase, variables de ambiente y manejo seguro de credenciales fuera del frontend.
+El repositorio no declara una licencia explicita en el estado actual. Agregar un archivo `LICENSE` antes de publicar o distribuir el proyecto como open source.

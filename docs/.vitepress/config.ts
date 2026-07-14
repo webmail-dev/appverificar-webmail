@@ -4,12 +4,12 @@ const config: UserConfig = {
   title: 'VerificarIT',
   description: 'Documentacion tecnica de VerificarIT',
   lang: 'es-CO',
-base: '/verificar/',
+  base: '/appverificar-webmail/',
   cleanUrls: true,
   lastUpdated: true,
   ignoreDeadLinks: [
     /^https:\/\/github\.com\//,
-    /^https:\/\/maproute39-hue\.github\.io\//,
+    /^https:\/\/webmail-dev\.github\.io\//,
   ],
   themeConfig: {
     logo: '/logo.svg',
@@ -19,9 +19,10 @@ base: '/verificar/',
     nav: [
       { text: 'Inicio', link: '/' },
       { text: 'Guia', link: '/guia/introduccion' },
-      { text: 'Home', link: '/funcionalidades/home' },
-      { text: 'Changelog', link: '/changelog' },
-      { text: 'GitHub', link: 'https://github.com/maproute39-hue/verificar' },
+      { text: 'Arquitectura', link: '/architecture' },
+      { text: 'Despliegue', link: '/deployment' },
+      { text: 'PWA', link: '/pwa' },
+      { text: 'GitHub', link: 'https://github.com/webmail-dev/appverificar-webmail' },
     ],
     sidebar: [
       {
@@ -34,8 +35,20 @@ base: '/verificar/',
       {
         text: 'Arquitectura',
         items: [
+          { text: 'Arquitectura actual', link: '/architecture' },
           { text: 'Vision general', link: '/arquitectura/overview' },
           { text: 'Realtime y cache', link: '/arquitectura/realtime-cache' },
+        ],
+      },
+      {
+        text: 'Operacion',
+        items: [
+          { text: 'Despliegue', link: '/deployment' },
+          { text: 'Dokploy', link: '/dokploy' },
+          { text: 'Docker', link: '/docker' },
+          { text: 'PWA', link: '/pwa' },
+          { text: 'Lectura movil', link: '/mobile' },
+          { text: 'Troubleshooting', link: '/troubleshooting' },
         ],
       },
       {
@@ -74,7 +87,7 @@ base: '/verificar/',
       },
     ],
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/maproute39-hue/verificar' },
+      { icon: 'github', link: 'https://github.com/webmail-dev/appverificar-webmail' },
     ],
     footer: {
       message: 'Documentacion tecnica de VerificarIT.',

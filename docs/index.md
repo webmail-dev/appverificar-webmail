@@ -16,8 +16,8 @@ hero:
       text: Home de inspecciones
       link: /funcionalidades/home
     - theme: alt
-      text: Changelog
-      link: /changelog
+      text: Despliegue
+      link: /deployment
 
 features:
   - title: Home operativo
@@ -32,9 +32,11 @@ features:
 
 - [Introduccion del sistema](/guia/introduccion)
 - [Instalacion y ejecucion local](/guia/instalacion)
-- [Arquitectura](/arquitectura/overview)
+- [Arquitectura actual](/architecture)
+- [Despliegue Dokploy](/deployment)
+- [Docker y Nginx](/docker)
+- [PWA](/pwa)
+- [Troubleshooting](/troubleshooting)
 - [Home de inspecciones](/funcionalidades/home)
 - [Inspecciones heredadas](/flujos/inspecciones-heredadas)
 - [Modelo de datos](/modelos/datos)
-- [Despliegue](/despliegue/guia)
-

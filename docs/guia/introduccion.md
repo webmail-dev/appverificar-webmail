@@ -2,11 +2,13 @@
 
 VerificarIT es un frontend Angular/PWA para la gestion de inspecciones vehiculares. Permite autenticar usuarios, crear inspecciones, consultar historial por placa, registrar firmas y fotografias, controlar vencimientos documentales y generar reportes PDF desde una plantilla Excel.
 
-La aplicacion se ejecuta como frontend estatico y consume servicios externos:
+La aplicacion se sirve como SPA estatica dentro de Nginx Alpine y consume servicios externos:
 
 - PocketBase para autenticacion, datos, archivos y realtime.
 - Gotenberg, o un proxy propio, para conversion de reportes XLSX/HTML a PDF.
 - Configuracion runtime mediante `public/config/app-config.js`.
+
+En produccion se despliega con Docker Compose en Dokploy. Docker copia el build Angular ya compilado desde `dist/verificar-app/browser`; no compila Angular dentro de la imagen.
 
 ## Funcionalidades principales
 
@@ -35,6 +37,8 @@ La aplicacion se ejecuta como frontend estatico y consume servicios externos:
 | Firmas | `@almothafar/angular-signature-pad` |
 | Reportes | ExcelJS, xlsx, file-saver, Gotenberg |
 | UI | Assets locales en `public/assets` |
+| Contenedor | Docker Compose con `nginx:alpine` |
+| Proxy publico | Traefik gestionado por Dokploy |
 
 ## Rutas principales
 
@@ -46,4 +50,3 @@ La aplicacion se ejecuta como frontend estatico y consume servicios externos:
 | `/heredada` | Creacion de inspeccion desde una base existente. |
 | `/inspections` | Listado general con busqueda y eliminacion. |
 | `/detail/:id` | Detalle, edicion, evidencias, firmas y PDF. |
-

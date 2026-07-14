@@ -34,12 +34,10 @@ La paginacion no se elimina; queda como modo alternativo del listado completo.
 
 ## Renderizado por modo
 
-| Modo | Condicion | Lista renderizada |
-|---|---|---|
-| Recientes | `viewMode === 'recent'` | `sortedRecentInspections` |
-| Todas sin paginacion | `viewMode === 'all' && showAllWithoutPagination` | `sortedAllInspections` |
-| Todas con paginacion | `viewMode === 'all' && !showAllWithoutPagination` | `pagedInspections` |
-| Problemas de vigencia | `viewMode === 'expiry-issues'` | `sortedExpiryIssues` |
+- Recientes: usa `sortedRecentInspections` cuando `viewMode === 'recent'`.
+- Todas sin paginacion: usa `sortedAllInspections` cuando `viewMode === 'all' && showAllWithoutPagination`.
+- Todas con paginacion: usa `pagedInspections` cuando `viewMode === 'all' && !showAllWithoutPagination`.
+- Problemas de vigencia: usa `sortedExpiryIssues` cuando `viewMode === 'expiry-issues'`.
 
 ## Inspecciones reemplazadas
 
@@ -69,4 +67,3 @@ En escritorio se muestra el checkbox **Ocultar tachadas** junto a los controles 
 - No aplica a **Recientes**.
 
 El filtro es visual: no modifica PocketBase, no elimina registros, no afecta busqueda, estadisticas ni creacion de heredadas.
-

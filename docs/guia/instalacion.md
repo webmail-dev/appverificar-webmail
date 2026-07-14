@@ -12,7 +12,7 @@
 ## Instalacion
 
 ```bash
-npm ci
+npm install
 ```
 
 ## Configuracion runtime
@@ -49,6 +49,21 @@ El build productivo queda en:
 dist/verificar-app/browser
 ```
 
+## Validacion Docker local
+
+El despliegue actual usa Nginx Alpine y requiere que el build ya exista antes de construir la imagen.
+
+```bash
+npm run build
+ls dist/verificar-app/browser
+docker compose config
+docker compose build
+docker compose up -d
+docker compose logs
+```
+
+Ver [Despliegue](../deployment.md), [Dokploy](../dokploy.md) y [Docker](../docker.md).
+
 ## Comandos de documentacion
 
 ```bash
@@ -58,4 +73,3 @@ npm run docs:preview
 ```
 
 VitePress usa `docs/` como raiz de documentacion y genera su salida en `docs/.vitepress/dist`.
-
