@@ -63,7 +63,7 @@ Valores actuales en `public/config/app-config.js`:
 ```js
 window.__APP_CONFIG__ = {
   pocketbaseUrl: '',
-  gotenbergBaseUrl: 'https://gotenberg.appverificar.online/',
+  gotenbergBaseUrl: 'https://gotenberg.buckapi.online/',
   imagesCollectionId: '5bjt6wpqfj0rnsl'
 };
 ```
