@@ -85,7 +85,7 @@ ls dist/verificar-app/browser/ngsw-worker.js
 Revisar `public/config/app-config.js`:
 
 ```js
-gotenbergBaseUrl: 'https://gotenberg.buckapi.online/'
+gotenbergBaseUrl: 'https://gotenberg.appverificar.online/'
 ```
 
 Tambien validar:

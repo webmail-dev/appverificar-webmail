@@ -1,1 +1,0 @@
-import{w as r}from"./chunk-QUO3MUP4.js";var o=class t{currentRoute="";static \u0275fac=function(e){return new(e||t)};static \u0275prov=r({token:t,factory:t.\u0275fac,providedIn:"root"})};export{o as a};
